@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusPeriode {
+  AKTIF
+  DITUTUP
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         String   @default("admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Anggota {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  noHp      String?  @map("no_hp")
+  alamat    String?
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  nota      Nota[]
+  pembagian Pembagian[]
+
+  @@map("anggota")
+}
+
+model Barang {
+  id           Int      @id @default(autoincrement())
+  namaBarang   String   @map("nama_barang")
+  hargaDefault Decimal  @map("harga_default") @db.Decimal(15, 2)
+  aktif        Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  notaItems NotaItem[]
+
+  @@map("barang")
+}
+
+model Nota {
+  id        Int      @id @default(autoincrement())
+  nomorNota String   @unique @map("nomor_nota")
+  anggotaId Int      @map("anggota_id")
+  tanggal   DateTime @db.Date
+  catatan   String?
+  fotoNota  String?  @map("foto_nota")
+
+  anggota Anggota    @relation(fields: [anggotaId], references: [id])
+  items   NotaItem[]
+
+  @@map("nota")
+}
+
+model NotaItem {
+  id         Int      @id @default(autoincrement())
+  notaId     Int      @map("nota_id")
+  barangId   Int?     @map("barang_id")
+  namaBarang String   @map("nama_barang")
+  qty        Int
+  hargaSatuan Decimal @map("harga_satuan") @db.Decimal(15, 2)
+  subtotal   Decimal  @db.Decimal(15, 2)
+
+  nota   Nota    @relation(fields: [notaId], references: [id], onDelete: Cascade)
+  barang Barang? @relation(fields: [barangId], references: [id], onDelete: SetNull)
+
+  @@map("nota_item")
+}
+
+model Periode {
+  id             Int           @id @default(autoincrement())
+  nama           String
+  tanggalMulai   DateTime      @map("tanggal_mulai") @db.Date
+  tanggalSelesai DateTime      @map("tanggal_selesai") @db.Date
+  totalLaba      Decimal?      @map("total_laba") @db.Decimal(15, 2)
+  status         StatusPeriode @default(AKTIF)
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  pembagian Pembagian[]
+
+  @@map("periode")
+}
+
+model Pembagian {
+  id           Int     @id @default(autoincrement())
+  periodeId    Int     @map("periode_id")
+  anggotaId    Int     @map("anggota_id")
+  totalBelanja Decimal @map("total_belanja") @db.Decimal(15, 2)
+  proporsi     Decimal @db.Decimal(10, 6)
+  nominalShu   Decimal @map("nominal_shu") @db.Decimal(15, 2)
+
+  periode Periode @relation(fields: [periodeId], references: [id])
+  anggota Anggota @relation(fields: [anggotaId], references: [id])
+
+  @@unique([periodeId, anggotaId])
+  @@map("pembagian")
+}

@@ -1,0 +1,33 @@
+{
+  "name": "shu-koperasi",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/api & npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "migrate": "npm run migrate --workspace=apps/api",
+    "migrate:dev": "npm run migrate:dev --workspace=apps/api",
+    "seed": "npm run seed --workspace=apps/api",
+    "generate": "npm run generate --workspace=apps/api",
+    "build": "npm run build --workspace=apps/api && npm run build --workspace=apps/web",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "bcrypt@5.1.1": true,
+    "esbuild@0.28.1": true,
+    "esbuild@0.25.12": true
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.65.0"
+  }
+}
