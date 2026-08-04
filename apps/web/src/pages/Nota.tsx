@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 type Anggota = { id: string; nomorAnggota: string; nama: string };
-type Barang = { id: string; kodeBarang: string; nama: string; harga: number };
-type NotaItem = { id?: string; barangId?: string; namaBarang: string; qty: number; hargaSatuan: number };
+type NotaItem = { id?: string; namaBarang: string; qty: number; hargaSatuan: number };
 type Nota = { id: string; nomorNota: string; tanggal: string; total: number; anggota?: { nama: string }; catatan?: string; fotoNota?: string };
 
 const formatRp = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -14,7 +13,6 @@ export default function Nota() {
   const [notasList, setNotasList] = useState<Nota[]>([]);
   const [loadingList, setLoadingList] = useState(false);
   const [anggotaList, setAnggotaList] = useState<Anggota[]>([]);
-  const [barangList, setBarangList] = useState<Barang[]>([]);
   const [detailNota, setDetailNota] = useState<(Nota & { items: NotaItem[] }) | null>(null);
 
   const [filterAnggota, setFilterAnggota] = useState('');
@@ -32,7 +30,6 @@ export default function Nota() {
 
   useEffect(() => {
     api.get('/anggota?aktif=true').then(res => setAnggotaList(res.data)).catch(console.error);
-    api.get('/barang?aktif=true').then(res => setBarangList(res.data)).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -152,7 +149,6 @@ export default function Nota() {
           <table className="items-table">
             <thead>
               <tr>
-                <th>Barang (Opsional)</th>
                 <th>Nama Barang</th>
                 <th style={{ width: 100 }}>Qty</th>
                 <th style={{ width: 150 }}>Harga Satuan</th>
@@ -163,22 +159,6 @@ export default function Nota() {
             <tbody>
               {formItems.map((item, idx) => (
                 <tr key={idx}>
-                  <td>
-                    <select value={item.barangId || ''} onChange={e => {
-                      const bId = e.target.value;
-                      const b = barangList.find(x => x.id === bId);
-                      const newItems = [...formItems];
-                      newItems[idx].barangId = bId;
-                      if (b) {
-                        newItems[idx].namaBarang = b.nama;
-                        newItems[idx].hargaSatuan = b.harga;
-                      }
-                      setFormItems(newItems);
-                    }}>
-                      <option value="">-- Kustom --</option>
-                      {barangList.map(b => <option key={b.id} value={b.id}>{b.nama}</option>)}
-                    </select>
-                  </td>
                   <td>
                     <input type="text" required value={item.namaBarang} onChange={e => {
                       const newItems = [...formItems];

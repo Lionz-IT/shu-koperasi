@@ -1,6 +1,5 @@
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom';
 import Anggota from './Anggota';
-import Barang from './Barang';
 import Nota from './Nota';
 import Periode from './Periode';
 import { DashboardHome } from './DashboardHome';
@@ -9,7 +8,6 @@ import { Laporan } from './Laporan';
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/anggota', label: 'Anggota' },
-  { to: '/barang', label: 'Barang' },
   { to: '/nota', label: 'Nota' },
   { to: '/periode', label: 'Periode' },
   { to: '/laporan', label: 'Laporan' },
@@ -54,7 +52,6 @@ export default function Dashboard() {
             element={<DashboardHome />}
           />
           <Route path="anggota" element={<Anggota />} />
-          <Route path="barang" element={<Barang />} />
           <Route path="nota" element={<Nota />} />
           <Route path="periode" element={<Periode />} />
           <Route path="laporan" element={<Laporan />} />

@@ -17,7 +17,6 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 export function DashboardHome() {
   const [stats, setStats] = useState({
     anggotaAktif: 0,
-    barangAktif: 0,
     totalNota: 0,
     periodeAktif: 0
   });
@@ -28,16 +27,14 @@ export function DashboardHome() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [anggotaRes, barangRes, notaRes, periodeRes] = await Promise.all([
+        const [anggotaRes, notaRes, periodeRes] = await Promise.all([
           api.get('/anggota?aktif=true'),
-          api.get('/barang?aktif=true'),
           api.get('/nota'),
           api.get('/periode')
         ]);
         
         setStats({
           anggotaAktif: anggotaRes.data.length,
-          barangAktif: barangRes.data.length,
           totalNota: notaRes.data.length,
           periodeAktif: periodeRes.data.filter((p: Record<string, unknown>) => p.status === 'AKTIF').length
         });
@@ -113,10 +110,6 @@ export function DashboardHome() {
         <div className="stat-card">
           <div className="stat-value">{stats.anggotaAktif}</div>
           <div className="stat-label">Total Anggota Aktif</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{stats.barangAktif}</div>
-          <div className="stat-label">Total Barang Aktif</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">{stats.totalNota}</div>

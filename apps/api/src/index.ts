@@ -6,7 +6,6 @@ import healthRoutes from './routes/health';
 import authRoutes from './routes/auth';
 import notaRoutes from './routes/nota';
 import anggotaRoutes from './routes/anggota';
-import barangRoutes from './routes/barang';
 import periodeRoutes from './routes/periode';
 import laporanRoutes from './routes/laporan';
 import { authMiddleware } from './middleware/auth';
@@ -26,7 +25,6 @@ app.use('/api/auth', authRoutes);
 // Protected routes (placeholder — future CRUD routes go here)
 app.use('/api', authMiddleware);
 app.use('/api/anggota', anggotaRoutes);
-app.use('/api/barang', barangRoutes);
 app.use('/api/nota', notaRoutes);
 app.use('/api/periode', periodeRoutes);
 app.use('/api/laporan', laporanRoutes);
