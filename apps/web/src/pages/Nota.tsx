@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 type Anggota = { id: string; nomorAnggota: string; nama: string };
-type NotaItem = { id?: string; namaBarang: string; qty: number; hargaSatuan: number };
+type NotaItem = { id?: string; namaBarang: string; qty: number; hargaModal: number; hargaSatuan: number };
 type Nota = { id: string; nomorNota: string; tanggal: string; total: number; anggota?: { nama: string }; catatan?: string; fotoNota?: string };
 
 const formatRp = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -25,7 +25,7 @@ export default function Nota() {
   const [formCatatan, setFormCatatan] = useState('');
   const [formFoto, setFormFoto] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string>('');
-  const [formItems, setFormItems] = useState<NotaItem[]>([{ namaBarang: '', qty: 1, hargaSatuan: 0 }]);
+  const [formItems, setFormItems] = useState<NotaItem[]>([{ namaBarang: '', qty: 1, hargaModal: 0, hargaSatuan: 0 }]);
   const [formSubmitting, setFormSubmitting] = useState(false);
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function Nota() {
       setFormCatatan('');
       setFormFoto(null);
       setFotoPreview('');
-      setFormItems([{ namaBarang: '', qty: 1, hargaSatuan: 0 }]);
+      setFormItems([{ namaBarang: '', qty: 1, hargaModal: 0, hargaSatuan: 0 }]);
     } catch {
       alert('Gagal menyimpan nota');
     } finally {
@@ -151,7 +151,8 @@ export default function Nota() {
               <tr>
                 <th>Nama Barang</th>
                 <th style={{ width: 100 }}>Qty</th>
-                <th style={{ width: 150 }}>Harga Satuan</th>
+                <th style={{ width: 150 }}>Harga Modal</th>
+                <th style={{ width: 150 }}>Harga Jual</th>
                 <th style={{ width: 150 }}>Subtotal</th>
                 <th style={{ width: 60 }}>Aksi</th>
               </tr>
@@ -170,6 +171,13 @@ export default function Nota() {
                     <input type="number" required min="1" value={item.qty} onChange={e => {
                       const newItems = [...formItems];
                       newItems[idx].qty = Number(e.target.value);
+                      setFormItems(newItems);
+                    }} />
+                  </td>
+                  <td>
+                    <input type="number" required min="0" value={item.hargaModal} onChange={e => {
+                      const newItems = [...formItems];
+                      newItems[idx].hargaModal = Number(e.target.value);
                       setFormItems(newItems);
                     }} />
                   </td>
@@ -202,7 +210,7 @@ export default function Nota() {
             </tfoot>
           </table>
           <button type="button" className="btn-secondary" style={{ marginBottom: '1rem' }} onClick={() => {
-            setFormItems([...formItems, { namaBarang: '', qty: 1, hargaSatuan: 0 }]);
+            setFormItems([...formItems, { namaBarang: '', qty: 1, hargaModal: 0, hargaSatuan: 0 }]);
           }}>+ Tambah Item</button>
           
           <div>

@@ -63,13 +63,15 @@ model Nota {
 }
 
 model NotaItem {
-  id         Int      @id @default(autoincrement())
-  notaId     Int      @map("nota_id")
-  barangId   Int?     @map("barang_id")
-  namaBarang String   @map("nama_barang")
-  qty        Int
-  hargaSatuan Decimal @map("harga_satuan") @db.Decimal(15, 2)
-  subtotal   Decimal  @db.Decimal(15, 2)
+  id          Int      @id @default(autoincrement())
+  notaId      Int      @map("nota_id")
+  barangId    Int?     @map("barang_id")
+  namaBarang  String   @map("nama_barang")
+  qty         Int
+  hargaModal  Decimal  @map("harga_modal") @db.Decimal(15, 2)
+  hargaSatuan Decimal  @map("harga_satuan") @db.Decimal(15, 2)
+  subtotal    Decimal  @db.Decimal(15, 2)
+  laba        Decimal  @db.Decimal(15, 2)
 
   nota   Nota    @relation(fields: [notaId], references: [id], onDelete: Cascade)
   barang Barang? @relation(fields: [barangId], references: [id], onDelete: SetNull)

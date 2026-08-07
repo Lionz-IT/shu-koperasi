@@ -72,7 +72,33 @@ export async function deletePeriode(id: number) {
   await prisma.periode.delete({ where: { id } });
 }
 
-export async function tutupPeriode(id: number, totalLabaInput: number) {
+export async function previewTutupPeriode(id: number) {
+  const periode = await prisma.periode.findUnique({ where: { id } });
+  if (!periode) throw new Error('Periode tidak ditemukan');
+
+  const notas = await prisma.nota.findMany({
+    where: {
+      tanggal: {
+        gte: periode.tanggalMulai,
+        lte: periode.tanggalSelesai
+      }
+    },
+    include: { items: true }
+  });
+
+  let totalLaba = new Prisma.Decimal(0);
+  let totalBelanja = new Prisma.Decimal(0);
+  for (const nota of notas) {
+    for (const item of nota.items) {
+      totalLaba = totalLaba.add(item.laba);
+      totalBelanja = totalBelanja.add(item.subtotal);
+    }
+  }
+
+  return { totalLaba, totalBelanja, totalNota: notas.length };
+}
+
+export async function tutupPeriode(id: number) {
   const periode = await prisma.periode.findUnique({ where: { id } });
   if (!periode) throw new Error('Periode tidak ditemukan');
   if (periode.status === 'DITUTUP') throw new Error('Periode sudah ditutup');
@@ -90,11 +116,14 @@ export async function tutupPeriode(id: number, totalLabaInput: number) {
 
     if (notas.length === 0) throw new Error('Tidak ada nota dalam periode ini');
 
+    let totalLaba = new Prisma.Decimal(0);
     const totalBelanjaPerAnggota = new Map<number, Prisma.Decimal>();
+
     for (const nota of notas) {
       let currentTotal = totalBelanjaPerAnggota.get(nota.anggotaId) || new Prisma.Decimal(0);
       for (const item of nota.items) {
         currentTotal = currentTotal.add(item.subtotal);
+        totalLaba = totalLaba.add(item.laba);
       }
       totalBelanjaPerAnggota.set(nota.anggotaId, currentTotal);
     }
@@ -106,12 +135,11 @@ export async function tutupPeriode(id: number, totalLabaInput: number) {
 
     if (grandTotal.isZero()) throw new Error('Total belanja semua anggota 0, tidak bisa membagikan SHU');
 
-    const dTotalLaba = new Prisma.Decimal(totalLabaInput);
     const pembagianData = [];
 
     for (const [anggotaId, totalBelanja] of totalBelanjaPerAnggota.entries()) {
       const proporsi = totalBelanja.dividedBy(grandTotal);
-      const nominalShu = proporsi.mul(dTotalLaba);
+      const nominalShu = proporsi.mul(totalLaba);
       pembagianData.push({
         anggotaId,
         totalBelanja,
@@ -131,7 +159,7 @@ export async function tutupPeriode(id: number, totalLabaInput: number) {
       where: { id },
       data: {
         status: 'DITUTUP',
-        totalLaba: dTotalLaba
+        totalLaba
       }
     });
 

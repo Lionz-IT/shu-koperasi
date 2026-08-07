@@ -40,8 +40,7 @@ export default function Periode() {
   const [saving, setSaving] = useState(false);
 
   const [tutupForm, setTutupForm] = useState<Periode | null>(null);
-  const [labaInput, setLabaInput] = useState('');
-
+  const [tutupPreview, setTutupPreview] = useState<{ totalLaba: number, totalBelanja: number, totalNota: number } | null>(null);
   const [detail, setDetail] = useState<Periode | null>(null);
 
   const fetchPeriode = async () => {
@@ -99,13 +98,13 @@ export default function Periode() {
 
   const handleTutup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tutupForm || !labaInput) return;
+    if (!tutupForm) return;
     setSaving(true);
     try {
-      await api.post(`/periode/${tutupForm.id}/tutup`, { totalLaba: Number(labaInput) });
+      await api.post(`/periode/${tutupForm.id}/tutup`);
       const { data: res } = await api.get(`/periode/${tutupForm.id}`);
       setTutupForm(null);
-      setLabaInput('');
+      setTutupPreview(null);
       fetchPeriode();
       setDetail(res);
     } catch (err: unknown) {
@@ -113,6 +112,16 @@ export default function Periode() {
       alert(e.response?.data?.message || 'Gagal menutup periode');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleOpenTutupModal = async (p: Periode) => {
+    setTutupForm(p);
+    try {
+      const { data: res } = await api.get(`/periode/${p.id}/preview-tutup`);
+      setTutupPreview(res);
+    } catch (err) {
+      console.error('Gagal mengambil preview', err);
     }
   };
 
@@ -169,7 +178,7 @@ export default function Periode() {
                       {p.status === 'AKTIF' ? (
                         <>
                           <button className="btn-sm btn-secondary" onClick={() => setForm(p)}>Edit</button>
-                          <button className="btn-sm btn-primary" onClick={() => setTutupForm(p)}>Tutup Periode</button>
+                          <button className="btn-sm btn-primary" onClick={() => handleOpenTutupModal(p)}>Tutup Periode</button>
                           <button className="btn-sm text-danger" onClick={() => handleDelete(p.id)}>Hapus</button>
                         </>
                       ) : (
@@ -231,31 +240,28 @@ export default function Periode() {
       )}
 
       {tutupForm && (
-        <div className="modal-overlay" onClick={() => setTutupForm(null)}>
+        <div className="modal-overlay" onClick={() => { setTutupForm(null); setTutupPreview(null); }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h2>Tutup Periode</h2>
             <p style={{ marginBottom: '1rem' }}>
               <strong>{tutupForm.nama}</strong> ({formatDate(tutupForm.tanggalMulai)} - {formatDate(tutupForm.tanggalSelesai)})
             </p>
             <form onSubmit={handleTutup}>
-              <div className="form-group">
-                <label>Total Laba (Rp)</label>
-                <input 
-                  type="number" 
-                  min="0"
-                  value={labaInput} 
-                  onChange={e => setLabaInput(e.target.value)} 
-                  required 
-                  className="form-control"
-                  placeholder="0"
-                />
-              </div>
+              {tutupPreview ? (
+                <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
+                  <div style={{ marginBottom: '0.5rem' }}>Total Nota: <strong>{tutupPreview.totalNota}</strong></div>
+                  <div style={{ marginBottom: '0.5rem' }}>Total Belanja: <strong>{formatRp(tutupPreview.totalBelanja)}</strong></div>
+                  <div style={{ fontSize: '1.1rem' }}>Total Laba: <strong className="text-success">{formatRp(tutupPreview.totalLaba)}</strong></div>
+                </div>
+              ) : (
+                <p>Menghitung data...</p>
+              )}
               <p className="text-danger" style={{ fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 500 }}>
-                Peringatan: Setelah ditutup, periode tidak bisa diubah lagi.
+                Peringatan: Setelah ditutup, periode tidak bisa diubah lagi dan laba akan dibagikan ke anggota.
               </p>
               <div className="modal-actions">
-                <button type="button" className="btn-secondary" onClick={() => setTutupForm(null)}>Batal</button>
-                <button type="submit" className="btn-primary" disabled={saving || !labaInput}>
+                <button type="button" className="btn-secondary" onClick={() => { setTutupForm(null); setTutupPreview(null); }}>Batal</button>
+                <button type="submit" className="btn-primary" disabled={saving || !tutupPreview}>
                   {saving ? 'Memproses...' : 'Tutup & Hitung SHU'}
                 </button>
               </div>

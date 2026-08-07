@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { listPeriode, getPeriode, createPeriode, updatePeriode, deletePeriode, tutupPeriode } from '../services/periode';
+import { listPeriode, getPeriode, createPeriode, updatePeriode, deletePeriode, tutupPeriode, previewTutupPeriode } from '../services/periode';
 
 export async function listPeriodeController(req: Request, res: Response): Promise<void> {
   try {
@@ -52,11 +52,21 @@ export async function deletePeriodeController(req: Request, res: Response): Prom
   }
 }
 
+export async function previewTutupController(req: Request, res: Response): Promise<void> {
+  try {
+    const id = Number(req.params.id);
+    const preview = await previewTutupPeriode(id);
+    res.json(preview);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Gagal menghitung preview';
+    res.status(msg.includes('tidak ditemukan') ? 404 : 500).json({ error: msg });
+  }
+}
+
 export async function tutupPeriodeController(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
-    const { totalLaba } = req.body;
-    const periode = await tutupPeriode(id, totalLaba);
+    const periode = await tutupPeriode(id);
     res.json({ success: true, data: periode });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Gagal menutup periode';

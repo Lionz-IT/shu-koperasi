@@ -18,6 +18,7 @@ interface CreateNotaInput {
     barangId?: number;
     namaBarang: string;
     qty: number;
+    hargaModal: number;
     hargaSatuan: number;
   }>;
 }
@@ -106,31 +107,22 @@ export async function createNota(data: CreateNotaInput) {
       nomorNota = `NOTA-${dateStr}-${nextSeq.toString().padStart(3, '0')}`;
     }
 
-    const itemsToCreate = await Promise.all(data.items.map(async (item) => {
-      let finalNamaBarang = item.namaBarang;
-      let finalHargaSatuan = item.hargaSatuan;
+    const itemsToCreate = data.items.map((item) => {
+      const hargaSatuan = item.hargaSatuan;
+      const hargaModal = item.hargaModal;
+      const subtotal = item.qty * hargaSatuan;
+      const laba = (hargaSatuan - hargaModal) * item.qty;
 
-      if (item.barangId) {
-        const barang = await tx.barang.findUnique({ where: { id: item.barangId } });
-        if (barang) {
-          if (!finalNamaBarang || finalNamaBarang.trim() === '') {
-             finalNamaBarang = barang.namaBarang;
-          }
-          // Only override if client didn't supply hargaSatuan or supplied 0 (though Zod ensures >0 for request)
-          if (!finalHargaSatuan && barang.hargaDefault) {
-             finalHargaSatuan = Number(barang.hargaDefault);
-          }
-        }
-      }
-      
       return {
         barangId: item.barangId,
-        namaBarang: finalNamaBarang,
+        namaBarang: item.namaBarang,
         qty: item.qty,
-        hargaSatuan: new Prisma.Decimal(finalHargaSatuan),
-        subtotal: new Prisma.Decimal(item.qty * finalHargaSatuan)
+        hargaModal: new Prisma.Decimal(hargaModal),
+        hargaSatuan: new Prisma.Decimal(hargaSatuan),
+        subtotal: new Prisma.Decimal(subtotal),
+        laba: new Prisma.Decimal(laba)
       };
-    }));
+    });
 
     const nota = await tx.nota.create({
       data: {
