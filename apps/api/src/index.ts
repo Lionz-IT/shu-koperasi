@@ -14,7 +14,7 @@ import { errorHandler } from './middleware/errorHandler';
 const app = express();
 const PORT = process.env.API_PORT || 3000;
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173', 'https://shu-koperasi-web.vercel.app'], credentials: true }));
 app.use(express.json());
 
 // Public routes
@@ -31,6 +31,10 @@ app.use('/api/laporan', laporanRoutes);
 // Global error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`API running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`API running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
