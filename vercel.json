@@ -19,8 +19,12 @@
       "dest": "apps/api/src/index.ts"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "apps/web/dist/assets/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "apps/web/package.json"
+      "dest": "apps/web/dist/index.html"
     }
   ]
 }
