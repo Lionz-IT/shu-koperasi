@@ -18,7 +18,6 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 // Public routes
-app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')));
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 

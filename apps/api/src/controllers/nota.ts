@@ -41,7 +41,9 @@ export async function createNotaController(req: Request, res: Response): Promise
     }
     const data = { ...req.body };
     if (req.file) {
-      data.fotoNota = `/uploads/nota/${req.file.filename}`;
+      const base64 = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype;
+      data.fotoNota = `data:${mimeType};base64,${base64}`;
     }
     const nota = await createNota(data);
     res.status(201).json(nota);
@@ -56,14 +58,6 @@ export async function deleteNotaController(req: Request, res: Response): Promise
     const id = Number(req.params.id);
     const nota = await getNota(id);
     await deleteNota(id);
-    
-    if (nota.fotoNota) {
-      const filename = nota.fotoNota.split('/').pop();
-      if (filename) {
-        const filepath = path.join(__dirname, '..', '..', 'uploads', 'nota', filename);
-        try { fs.unlinkSync(filepath); } catch { /* best effort */ }
-      }
-    }
     
     res.json({ success: true, message: 'Nota berhasil dihapus' });
   } catch (err) {

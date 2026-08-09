@@ -3,8 +3,22 @@
 Sistem web untuk pencatatan nota belanja anggota koperasi dan perhitungan pembagian SHU (Sisa Hasil Usaha) secara proporsional.
 
 **Rumus**: `SHU_anggota = (total_belanja_anggota / total_belanja_semua) × total_laba`
+**Laba**: Otomatis dihitung per nota (Σ `(hargaJual - hargaModal) * qty`)
 
-## Prasyarat
+## Deployment (Vercel + Supabase)
+
+Proyek ini sudah disiapkan untuk deploy ke serverless seperti Vercel. 
+File foto nota akan dikonversi ke format **Base64** dan disimpan langsung di database (supaya tidak hilang saat server Vercel restart).
+
+### Langkah Deploy:
+1. Buat project di [Supabase](https://supabase.com/) dan dapatkan URL Database (PostgreSQL).
+2. Push repository ini ke GitHub.
+3. Import repo di [Vercel](https://vercel.com/).
+4. Atur **Environment Variables** di dashboard Vercel:
+   - `DATABASE_URL` = `postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres` (contoh)
+   - `JWT_SECRET` = `rahasia-panjang-bebas`
+   - `API_PORT` = `3000` (atau biarkan default)
+5. Deploy. Vercel otomatis menggunakan `vercel.json` untuk menjalankan `apps/api` (Backend) dan mem-build `apps/web` (Frontend).
 
 - Node.js >= 18
 - PostgreSQL (via Docker **atau** install langsung di host)
