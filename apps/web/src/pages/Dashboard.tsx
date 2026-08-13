@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom';
 import Anggota from './Anggota';
 import Nota from './Nota';
@@ -15,6 +16,7 @@ const navItems = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function handleLogout() {
     localStorage.removeItem('token');
@@ -23,7 +25,11 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      <aside className="sidebar">
+      <button className="hamburger" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu">
+        {sidebarOpen ? '✕' : '☰'}
+      </button>
+      <div className={`sidebar-backdrop ${sidebarOpen ? 'visible' : ''}`} onClick={() => setSidebarOpen(false)} />
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <h2>SHU Koperasi</h2>
           <span>Sistem Pembagian SHU</span>
@@ -35,6 +41,7 @@ export default function Dashboard() {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) => (isActive ? 'active' : '')}
+              onClick={() => setSidebarOpen(false)}
             >
               {item.label}
             </NavLink>
