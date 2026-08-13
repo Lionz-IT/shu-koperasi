@@ -10,7 +10,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import api from '../lib/api';
+import api, { getErrorMessage } from '../lib/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -23,9 +23,12 @@ export function DashboardHome() {
 
   const [notaData, setNotaData] = useState<Record<string, unknown>[]>([]);
   const [periodeData, setPeriodeData] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
         const [anggotaRes, notaRes, periodeRes] = await Promise.all([
           api.get('/anggota?aktif=true'),
@@ -41,12 +44,18 @@ export function DashboardHome() {
 
         setNotaData(notaRes.data);
         setPeriodeData(periodeRes.data);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error(err);
+        setError(getErrorMessage(err, 'Gagal memuat data dashboard'));
+      } finally {
+        setLoading(false);
       }
     }
     fetchData();
   }, []);
+
+  if (loading) return <div><h1>Dashboard</h1><p className="muted">Memuat data...</p></div>;
+  if (error) return <div><h1>Dashboard</h1><p className="text-danger">{error}</p></div>;
 
   const belanjaPerAnggota = notaData.reduce((acc: Record<string, number>, nota: Record<string, unknown>) => {
     const anggota = nota.anggota as Record<string, unknown> | undefined;

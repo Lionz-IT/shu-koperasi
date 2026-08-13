@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { listNota, getNota, createNota, deleteNota } from '../services/nota';
-import path from 'path';
-import fs from 'fs';
 
 export async function listNotaController(req: Request, res: Response): Promise<void> {
   try {

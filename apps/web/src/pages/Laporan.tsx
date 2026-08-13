@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
-
-type PeriodeItem = { id: number; nama: string; status: string };
-type PembagianItem = { anggotaId: number; namaAnggota: string; totalBelanja: number; proporsi: number; nominalShu: number };
-type LaporanData = {
-  periode: { nama: string; tanggalMulai: string; tanggalSelesai: string };
-  summary: { totalLaba: number; totalBelanja: number; jumlahAnggota: number };
-  pembagian: PembagianItem[];
-};
+import type { Periode, LaporanData } from '../lib/types';
 
 export function Laporan() {
-  const [periodeData, setPeriodeData] = useState<PeriodeItem[]>([]);
+  const [periodeData, setPeriodeData] = useState<Pick<Periode, 'id' | 'nama' | 'status'>[]>([]);
   const [selectedPeriode, setSelectedPeriode] = useState<string>('');
   const [laporan, setLaporan] = useState<LaporanData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,7 +12,7 @@ export function Laporan() {
     async function fetchPeriode() {
       try {
         const res = await api.get('/periode');
-        const closed = res.data.filter((p: PeriodeItem) => p.status === 'DITUTUP');
+        const closed = res.data.filter((p: Pick<Periode, 'id' | 'nama' | 'status'>) => p.status === 'DITUTUP');
         setPeriodeData(closed);
         if (closed.length > 0) {
           setSelectedPeriode(closed[0].id.toString());
@@ -129,7 +122,7 @@ export function Laporan() {
                 {laporan.pembagian.map((p, index) => (
                   <tr key={p.anggotaId}>
                     <td>{index + 1}</td>
-                    <td>{p.namaAnggota}</td>
+                    <td>{p.anggota.nama}</td>
                     <td style={{ textAlign: 'right' }}>{formatCurrency(p.totalBelanja)}</td>
                     <td style={{ textAlign: 'right' }}>{(Number(p.proporsi) * 100).toFixed(2)}%</td>
                     <td style={{ textAlign: 'right', fontWeight: '500' }}>{formatCurrency(p.nominalShu)}</td>

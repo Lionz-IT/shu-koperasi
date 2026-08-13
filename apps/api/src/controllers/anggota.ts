@@ -54,7 +54,7 @@ export async function updateAnggotaController(req: Request<{ id: string }>, res:
 export async function deleteAnggotaController(req: Request<{ id: string }>, res: Response): Promise<void> {
   try {
     const id = parseInt(req.params.id, 10);
-    const anggota = await anggotaService.deleteAnggota(id);
+    const anggota = await anggotaService.deactivateAnggota(id);
     res.json(anggota);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Gagal menghapus anggota';

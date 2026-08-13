@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../lib/api';
-
-type Anggota = { id: string; nomorAnggota: string; nama: string };
-type NotaItem = { id?: string; namaBarang: string; qty: number; hargaModal: number; hargaSatuan: number };
-type Nota = { id: string; nomorNota: string; tanggal: string; total: number; anggota?: { nama: string }; catatan?: string; fotoNota?: string };
+import type { Anggota, Nota, NotaItem } from '../lib/types';
 
 const formatRp = (val: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
 const formatDate = (val: string) => new Date(val).toLocaleDateString('id-ID');
@@ -59,7 +56,7 @@ export default function Nota() {
     if (view === 'list') fetchList();
   }, [view, filterAnggota, filterDari, filterSampai, filterSearch]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Hapus nota ini?')) return;
     try {
       await api.delete('/nota/' + id);
@@ -69,7 +66,7 @@ export default function Nota() {
     }
   };
 
-  const handleLihat = async (id: string) => {
+  const handleLihat = async (id: number) => {
     try {
       const res = await api.get('/nota/' + id);
       setDetailNota(res.data);
@@ -300,7 +297,7 @@ export default function Nota() {
               <div style={{ marginBottom: '1rem' }}>
                 <p><strong>Foto Nota:</strong></p>
                 <img 
-                  src={`http://localhost:3000${detailNota.fotoNota}`}
+                  src={detailNota.fotoNota}
                   alt="Foto Nota"
                   style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                 />

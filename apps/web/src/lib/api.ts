@@ -23,4 +23,12 @@ api.interceptors.response.use(
   },
 );
 
+export function getErrorMessage(err: unknown, fallback = 'Terjadi kesalahan'): string {
+  if (err && typeof err === 'object' && 'response' in err) {
+    const res = (err as { response?: { data?: { error?: string; message?: string } } }).response;
+    return res?.data?.error || res?.data?.message || fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
+
 export default api;

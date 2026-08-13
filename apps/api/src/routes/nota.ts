@@ -1,8 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { validate } from '../middleware/validate';
 import { listNotaController, getNotaController, createNotaController, deleteNotaController } from '../controllers/nota';
 
@@ -31,7 +29,8 @@ const createNotaSchema = z.object({
     barangId: z.coerce.number().int().positive().optional(),
     namaBarang: z.string().min(1, 'Nama barang wajib diisi'),
     qty: z.coerce.number().int().positive('Qty harus lebih dari 0'),
-    hargaSatuan: z.coerce.number().positive('Harga satuan harus lebih dari 0')
+    hargaSatuan: z.coerce.number().positive('Harga satuan harus lebih dari 0'),
+    hargaModal: z.coerce.number().nonnegative('Harga modal tidak boleh negatif')
   })).min(1, 'Minimal 1 item nota wajib ada')
 });
 

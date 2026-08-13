@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react';
-import api from '../lib/api';
-
-type Anggota = {
-  id: number;
-  nama: string;
-  noHp: string | null;
-  alamat: string | null;
-  aktif: boolean;
-};
+import api, { getErrorMessage } from '../lib/api';
+import type { Anggota } from '../lib/types';
 
 export default function Anggota() {
   const [data, setData] = useState<Anggota[]>([]);
@@ -28,7 +21,7 @@ export default function Anggota() {
       });
       setData(res);
     } catch (err: unknown) {
-      setError((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Gagal memuat data');
+      setError(getErrorMessage(err, 'Gagal memuat data'));
     } finally {
       setLoading(false);
     }
@@ -51,7 +44,7 @@ export default function Anggota() {
       setForm(null);
       fetchAnggota();
     } catch (err: unknown) {
-      alert((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Gagal menyimpan data');
+      alert(getErrorMessage(err, 'Gagal menyimpan data'));
     } finally {
       setSaving(false);
     }
@@ -63,7 +56,7 @@ export default function Anggota() {
       await api.delete(`/anggota/${id}`);
       fetchAnggota();
     } catch (err: unknown) {
-      alert((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Gagal menghapus data');
+      alert(getErrorMessage(err, 'Gagal menghapus data'));
     }
   };
 

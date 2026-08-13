@@ -38,7 +38,7 @@ export async function updateAnggota(id: number, data: { nama?: string; noHp?: st
   });
 }
 
-export async function deleteAnggota(id: number) {
+export async function deactivateAnggota(id: number) {
   const anggota = await prisma.anggota.findUnique({ where: { id } });
   if (!anggota) throw new Error('Anggota tidak ditemukan');
   

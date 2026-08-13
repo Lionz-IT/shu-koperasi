@@ -1,30 +1,6 @@
 import { useState, useEffect } from 'react';
-import api from '../lib/api';
-
-type AnggotaPembagian = {
-  id: number;
-  nama: string;
-};
-
-type Pembagian = {
-  id: number;
-  anggotaId: number;
-  totalBelanja: number;
-  proporsi: number;
-  nominalShu: number;
-  anggota: AnggotaPembagian;
-};
-
-type Periode = {
-  id: number;
-  nama: string;
-  tanggalMulai: string;
-  tanggalSelesai: string;
-  totalLaba: number;
-  status: 'AKTIF' | 'DITUTUP';
-  createdAt: string;
-  pembagian?: Pembagian[];
-};
+import api, { getErrorMessage } from '../lib/api';
+import type { Periode, Pembagian } from '../lib/types';
 
 const formatRp = (val: number) => 
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -50,8 +26,7 @@ export default function Periode() {
       const { data: res } = await api.get('/periode');
       setData(res);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      setError(e.response?.data?.message || 'Gagal memuat data');
+      setError(getErrorMessage(err, 'Gagal memuat data'));
     } finally {
       setLoading(false);
     }
@@ -78,8 +53,7 @@ export default function Periode() {
       setForm(null);
       fetchPeriode();
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || 'Gagal menyimpan data');
+      alert(getErrorMessage(err, 'Gagal menyimpan data'));
     } finally {
       setSaving(false);
     }
@@ -91,8 +65,7 @@ export default function Periode() {
       await api.delete(`/periode/${id}`);
       fetchPeriode();
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || 'Gagal menghapus data');
+      alert(getErrorMessage(err, 'Gagal menghapus data'));
     }
   };
 
@@ -108,8 +81,7 @@ export default function Periode() {
       fetchPeriode();
       setDetail(res);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || 'Gagal menutup periode');
+      alert(getErrorMessage(err, 'Gagal menutup periode'));
     } finally {
       setSaving(false);
     }
@@ -130,8 +102,7 @@ export default function Periode() {
       const { data: res } = await api.get(`/periode/${id}`);
       setDetail(res);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { message?: string } } };
-      alert(e.response?.data?.message || 'Gagal memuat detail');
+      alert(getErrorMessage(err, 'Gagal memuat detail'));
     }
   };
 
